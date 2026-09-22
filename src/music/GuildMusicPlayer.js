@@ -141,7 +141,7 @@ class GuildMusicPlayer {
     }
 
     skip() {
-        
+
         if (!this.currentTrack) {
             return false;
         }
@@ -149,6 +149,22 @@ class GuildMusicPlayer {
         this.audioPlayer.stop();
 
         return true;
+    }
+
+    pause() {
+        if (!this.currentTrack) {
+            return false;
+        }
+
+        return this.audioPlayer.pause();
+    }
+
+    resume() {
+        if (!this.currentTrack) {
+            return false;
+        }
+
+        return this.audioPlayer.unpause();
     }
 
     leave() {
