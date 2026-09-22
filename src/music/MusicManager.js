@@ -1,3 +1,5 @@
+const GuildMusicPlayer = require('./GuildMusicPlayer');
+
 class MusicManager {
 
     constructor(client) {
@@ -6,15 +8,33 @@ class MusicManager {
     }
 
     getPlayer(guildId) {
-        // ...
+        return this.players.get(guildId);
     }
 
-    createPlayer(guildId) {
-        // ...
+    createPlayer(guild) {
+        const player = new GuildMusicPlayer(guild);
+
+        this.players.set(guild.id, player);
+
+        return player;
+    }
+
+    getOrCreatePlayer(guild) {
+        return this.getPlayer(guild.id)
+            ?? this.createPlayer(guild);
     }
 
     removePlayer(guildId) {
-        // ...
+        const player = this.players.get(guildId);
+
+        if (!player) {
+            return false;
+        }
+
+        player.leave();
+        this.players.delete(guildId);
+
+        return true;
     }
 }
 

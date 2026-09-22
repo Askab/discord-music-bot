@@ -6,6 +6,7 @@ const {
 const config = require('../config/config');
 const EventHandler = require('./EventHandler');
 const CommandHandler = require('../commands/CommandHandler');
+const MusicManager = require('../music/MusicManager');
 
 class DiscordBot {
 
@@ -20,6 +21,9 @@ class DiscordBot {
 
         this.commandHandler = new CommandHandler();
         this.client.commandHandler = this.commandHandler;
+
+        this.musicManager = new MusicManager(this.client);
+        this.client.musicManager = this.musicManager;
 
         this.eventHandler = new EventHandler(this.client);
     }

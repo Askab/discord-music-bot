@@ -1,31 +1,49 @@
+const {
+    createAudioPlayer,
+    joinVoiceChannel,
+    VoiceConnectionStatus,
+    entersState
+} = require('@discordjs/voice');
+
 class GuildMusicPlayer {
 
-    constructor(guildId) {
-        this.guildId = guildId;
+    constructor(guild) {
+        this.guild = guild;
+        this.guildId = guild.id;
 
-        this.queue = [];
         this.connection = null;
-        this.audioPlayer = null;
+        this.audioPlayer = createAudioPlayer();
     }
 
-    async play() {
-        // ...
+    async join(channel) {
+        if (this.connection) {
+            this.connection.destroy();
+        }
+
+        this.connection = joinVoiceChannel({
+            channelId: channel.id,
+            guildId: this.guildId,
+            adapterCreator: this.guild.voiceAdapterCreator
+        });
+
+        this.connection.subscribe(this.audioPlayer);
+
+        await entersState(
+            this.connection,
+            VoiceConnectionStatus.Ready,
+            10_000
+        );
+
+        return this.connection;
     }
 
-    pause() {
-        // ...
-    }
+    leave() {
+        if (!this.connection) {
+            return;
+        }
 
-    resume() {
-        // ...
-    }
-
-    skip() {
-        // ...
-    }
-
-    stop() {
-        // ...
+        this.connection.destroy();
+        this.connection = null;
     }
 }
 
