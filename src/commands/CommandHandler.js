@@ -53,37 +53,43 @@ class CommandHandler {
     }
 
     async handle(interaction) {
-        if (!interaction.isChatInputCommand()) {
+        const command =
+            this.commands.get(interaction.commandName);
+
+        if (!command) {
             return;
         }
 
-        const command = this.commands.get(interaction.commandName);
+        if (interaction.isAutocomplete()) {
+            if (typeof command.autocomplete !== 'function') {
+                return;
+            }
 
-        if (!command) {
-            console.warn(`Unknown command: ${interaction.commandName}`);
+            try {
+                await command.autocomplete(interaction);
+            } catch (error) {
+                console.error(
+                    `Error handling autocomplete for "${interaction.commandName}":`,
+                    error
+                );
+
+                await interaction.respond([]).catch(() => {});
+            }
+
+            return;
+        }
+
+        if (!interaction.isChatInputCommand()) {
             return;
         }
 
         try {
             await command.execute(interaction);
         } catch (error) {
-
             console.error(
-                `Error executing command: ${interaction.commandName}`,
+                `Error executing command "${interaction.commandName}":`,
                 error
             );
-
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({
-                    content: 'Error while executing command.',
-                    ephemeral: MessageFlags.Ephemeral
-                });
-            } else {
-                await interaction.reply({
-                    content: 'Error while executing command.',
-                    ephemeral: MessageFlags.Ephemeral
-                });
-            }
         }
     }
 }

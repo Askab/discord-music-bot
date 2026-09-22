@@ -3,6 +3,10 @@ const {
     MessageFlags
 } = require('discord.js');
 
+const {
+    capitalizeWords
+} = require('../../utils/StringUtils');
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('playlist')
@@ -15,19 +19,49 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('play')
-                .setDescription('Plays the given playlist.')
+                .setDescription('Play a playlist.')
                 .addStringOption(option =>
                     option
                         .setName('name')
-                        .setDescription('The playlist\'s name.')
+                        .setDescription('Select a playlist.')
                         .setRequired(true)
+                        .setAutocomplete(true)
                 )
         ),
 
-    async execute(interaction) {
-        const musicManager = interaction.client.musicManager;
+    async autocomplete(interaction) {
+        const musicManager =
+            interaction.client.musicManager;
 
-        const subcommand = interaction.options.getSubcommand();
+        const playlists =
+            musicManager.playlistService.getPlaylists();
+
+        const focusedValue =
+            interaction.options
+                .getFocused()
+                .toLowerCase();
+
+        const choices = playlists
+            .filter(playlist =>
+                playlist.name
+                    .toLowerCase()
+                    .includes(focusedValue)
+            )
+            .slice(0, 25)
+            .map(playlist => ({
+                name: capitalizeWords(playlist.name),
+                value: playlist.name
+            }));
+
+        await interaction.respond(choices);
+    },
+
+    async execute(interaction) {
+        const musicManager =
+            interaction.client.musicManager;
+
+        const subcommand =
+            interaction.options.getSubcommand();
 
         if (subcommand === 'list') {
             const playlists =
@@ -35,7 +69,7 @@ module.exports = {
 
             if (playlists.length === 0) {
                 await interaction.reply({
-                    content: 'Nincsenek elérhető playlist-ek. 🎵',
+                    content: 'No playlists are available. 🎵',
                     flags: MessageFlags.Ephemeral
                 });
 
@@ -44,7 +78,8 @@ module.exports = {
 
             const lines = playlists.map(
                 (playlist, index) =>
-                    `${index + 1}. **${playlist.name}** — ${playlist.size} track`
+                    `${index + 1}. **${capitalizeWords(playlist.name)}** — ` +
+                    `${playlist.size} track${playlist.size === 1 ? '' : 's'}`
             );
 
             await interaction.reply(
@@ -65,27 +100,29 @@ module.exports = {
 
             if (!playlist) {
                 await interaction.reply({
-                    content: `Nem találom ezt a playlist-et: **${playlistName}**`,
+                    content: `Playlist not found: **${playlistName}**`,
                     flags: MessageFlags.Ephemeral
                 });
 
                 return;
             }
 
-            const channel = interaction.member.voice.channel;
+            const channel =
+                interaction.member.voice.channel;
 
             if (!channel) {
                 await interaction.reply({
-                    content: 'Előbb lépj be egy voice channelbe! 🎤',
+                    content: 'Join a voice channel first! 🎤',
                     flags: MessageFlags.Ephemeral
                 });
 
                 return;
             }
 
-            const player = musicManager.getOrCreatePlayer(
-                interaction.guild
-            );
+            const player =
+                musicManager.getOrCreatePlayer(
+                    interaction.guild
+                );
 
             try {
                 await player.join(channel);
@@ -94,9 +131,13 @@ module.exports = {
                     player.addTrack(track);
                 }
 
+                //Shuffle
+                player.queue.randomize();
+
                 await interaction.reply(
-                    `🎵 **${playlist.name}** playlist hozzáadva a lejátszási sorhoz. ` +
-                    `(${playlist.size} track)`
+                    `🎵 **${capitalizeWords(playlist.name)}** ` +
+                    `playlist has been added to the queue. ` +
+                    `(${playlist.size} track${playlist.size === 1 ? '' : 's'})`
                 );
             } catch (error) {
                 console.error(
@@ -105,7 +146,7 @@ module.exports = {
                 );
 
                 await interaction.reply({
-                    content: 'Nem sikerült elindítani a playlist-et.',
+                    content: 'Failed to start the playlist.',
                     flags: MessageFlags.Ephemeral
                 });
             }
