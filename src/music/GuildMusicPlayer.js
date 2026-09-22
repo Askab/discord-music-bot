@@ -2,22 +2,77 @@ const {
     createAudioPlayer,
     joinVoiceChannel,
     VoiceConnectionStatus,
+    AudioPlayerStatus,
     entersState
 } = require('@discordjs/voice');
 
+const Queue = require('./Queue');
+
 class GuildMusicPlayer {
 
-    constructor(guild) {
+    constructor(guild, audioService) {
         this.guild = guild;
         this.guildId = guild.id;
 
+        this.audioService = audioService;
+
         this.connection = null;
+        this.channelId = null;
+
         this.audioPlayer = createAudioPlayer();
+
+        this.queue = new Queue();
+        this.currentTrack = null;
+
+        this.setupAudioPlayerEvents();
+    }
+
+    setupAudioPlayerEvents() {
+        this.audioPlayer.on(
+            AudioPlayerStatus.Playing,
+            () => {
+                console.log(
+                    `[${this.guildId}] Audio playback started.`
+                );
+            }
+        );
+
+        this.audioPlayer.on(
+            AudioPlayerStatus.Idle,
+            () => {
+                console.log(
+                    `[${this.guildId}] Audio playback finished.`
+                );
+
+                this.playNext();
+            }
+        );
+
+        this.audioPlayer.on(
+            'error',
+            error => {
+                console.error(
+                    `[${this.guildId}] Audio player error:`,
+                    error
+                );
+
+                this.playNext();
+            }
+        );
     }
 
     async join(channel) {
+        
+        if (
+            this.connection &&
+            this.channelId === channel.id
+        ) {
+            return this.connection;
+        }
+
         if (this.connection) {
             this.connection.destroy();
+            this.connection = null;
         }
 
         this.connection = joinVoiceChannel({
@@ -34,7 +89,44 @@ class GuildMusicPlayer {
             10_000
         );
 
+        this.channelId = channel.id;
+
         return this.connection;
+    }
+
+    addTrack(track) {
+        this.queue.add(track);
+
+        if (!this.currentTrack) {
+            this.playNext();
+        }
+    }
+
+    playNext() {
+        const track = this.queue.next();
+
+        if (!track) {
+            this.currentTrack = null;
+
+            console.log(
+                `[${this.guildId}] Queue is empty.`
+            );
+
+            return;
+        }
+
+        this.currentTrack = track;
+
+        const resource = this.audioService.createResource(track);
+
+        this.audioPlayer.play(resource);
+    }
+
+    stop() {
+        this.currentTrack = null;
+        this.queue.clear();
+
+        this.audioPlayer.stop();
     }
 
     leave() {
@@ -42,8 +134,11 @@ class GuildMusicPlayer {
             return;
         }
 
+        this.stop();
+
         this.connection.destroy();
         this.connection = null;
+        this.channelId = null;
     }
 }
 

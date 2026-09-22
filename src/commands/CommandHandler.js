@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { Collection } = require('discord.js');
+const { MessageFlags } = require('discord.js');
 
 class CommandHandler {
 
@@ -75,12 +76,12 @@ class CommandHandler {
             if (interaction.replied || interaction.deferred) {
                 await interaction.followUp({
                     content: 'Error while executing command.',
-                    ephemeral: true
+                    ephemeral: MessageFlags.Ephemeral
                 });
             } else {
                 await interaction.reply({
                     content: 'Error while executing command.',
-                    ephemeral: true
+                    ephemeral: MessageFlags.Ephemeral
                 });
             }
         }

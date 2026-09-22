@@ -1,9 +1,10 @@
 const { SlashCommandBuilder } = require('discord.js');
+const { MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('join')
-        .setDescription('Belépteti a botot a voice channeledbe.'),
+        .setDescription('Join a voice channel.'),
 
     async execute(interaction) {
 
@@ -13,7 +14,7 @@ module.exports = {
         if (!channel) {
             await interaction.reply({
                 content: 'Join a voice channel! 🎤',
-                ephemeral: true
+                ephemeral: MessageFlags.Ephemeral
             });
 
             return;
@@ -36,8 +37,8 @@ module.exports = {
             console.error('Failed to join voice channel:', error);
 
             await interaction.reply({
-                content: 'Nem sikerült csatlakoznom a voice channelhez.',
-                ephemeral: true
+                content: 'Failed to join voice channel.',
+                ephemeral: MessageFlags.Ephemeral
             });
         }
     }

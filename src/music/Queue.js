@@ -23,6 +23,15 @@ class Queue {
     get current() {
         return this.items[0];
     }
+
+    randomize() {
+        for (let i = this.items.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+
+            [this.items[i], this.items[j]] =
+                [this.items[j], this.items[i]];
+        }
+    }
 }
 
 module.exports = Queue;

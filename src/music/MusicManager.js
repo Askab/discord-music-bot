@@ -1,10 +1,13 @@
 const GuildMusicPlayer = require('./GuildMusicPlayer');
+const AudioService = require('../services/AudioService');
 
 class MusicManager {
 
     constructor(client) {
         this.client = client;
+
         this.players = new Map();
+        this.audioService = new AudioService();
     }
 
     getPlayer(guildId) {
@@ -12,7 +15,11 @@ class MusicManager {
     }
 
     createPlayer(guild) {
-        const player = new GuildMusicPlayer(guild);
+        
+        const player = new GuildMusicPlayer(
+            guild,
+            this.audioService
+        );
 
         this.players.set(guild.id, player);
 
