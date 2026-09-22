@@ -8,6 +8,9 @@ const {
 
 const Queue = require('./Queue');
 
+const MusicPlayerUpdater =
+    require('../components/music/MusicPlayerUpdater');
+
 class GuildMusicPlayer {
 
     constructor(guild, audioService) {
@@ -23,6 +26,9 @@ class GuildMusicPlayer {
 
         this.queue = new Queue();
         this.currentTrack = null;
+
+        this.playerUpdater =
+            new MusicPlayerUpdater(this);
         
         this.currentTrackStartedAt = null;
         this.pausedAt = null;
@@ -150,6 +156,8 @@ class GuildMusicPlayer {
         );
 
         this.audioPlayer.play(resource);
+
+        this.playerUpdater.update();
     }
 
     stop() {
@@ -187,6 +195,8 @@ class GuildMusicPlayer {
 
         this.pausedAt = Date.now();
 
+        this.playerUpdater.update();
+
         return true;
     }
 
@@ -207,6 +217,8 @@ class GuildMusicPlayer {
 
             this.pausedAt = null;
         }
+
+        this.playerUpdater.update();
 
         return true;
     }

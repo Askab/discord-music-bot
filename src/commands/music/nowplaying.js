@@ -17,6 +17,7 @@ module.exports = {
         .setDescription('Show the currently playing track.'),
 
     async execute(interaction) {
+        
         const musicManager =
             interaction.client.musicManager;
 
@@ -41,9 +42,17 @@ module.exports = {
         const buttons =
             createMusicPlayerButtons(player);
 
-        await interaction.reply({
-            embeds: [embed],
-            components: buttons
-        });
+        const message =
+            await interaction.reply({
+                embeds: [embed],
+                components: buttons,
+                fetchReply: true
+            });
+
+        player.playerUpdater.setMessage(
+            message
+        );
+
+        player.playerUpdater.start();
     }
 };

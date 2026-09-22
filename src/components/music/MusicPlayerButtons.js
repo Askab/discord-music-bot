@@ -184,10 +184,12 @@ async function handleSkip(interaction, player) {
         return;
     }
 
-    await updateMusicPlayer(
+    /*await updateMusicPlayer(
         interaction,
         player
-    );
+    );*/
+
+    await interaction.deferUpdate();
 }
 
 async function handleShuffle(interaction, player) {
