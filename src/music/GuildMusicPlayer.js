@@ -140,6 +140,17 @@ class GuildMusicPlayer {
         this.audioPlayer.stop();
     }
 
+    skip() {
+        
+        if (!this.currentTrack) {
+            return false;
+        }
+
+        this.audioPlayer.stop();
+
+        return true;
+    }
+
     leave() {
         if (!this.connection) {
             return;
