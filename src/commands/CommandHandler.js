@@ -3,6 +3,10 @@ const path = require('path');
 const { Collection } = require('discord.js');
 const { MessageFlags } = require('discord.js');
 
+const {
+    handleMusicPlayerButton
+} = require('../components/music/MusicPlayerButtons');
+
 class CommandHandler {
 
     constructor() {
@@ -53,33 +57,60 @@ class CommandHandler {
     }
 
     async handle(interaction) {
-        const command =
-            this.commands.get(interaction.commandName);
 
-        if (!command) {
+        if (interaction.isButton()) {
+            if (
+                interaction.customId.startsWith('music_')
+            ) {
+                await handleMusicPlayerButton(
+                    interaction
+                );
+            }
+
             return;
         }
 
         if (interaction.isAutocomplete()) {
-            if (typeof command.autocomplete !== 'function') {
+            const command =
+                this.commands.get(
+                    interaction.commandName
+                );
+
+            if (
+                !command ||
+                typeof command.autocomplete !== 'function'
+            ) {
                 return;
             }
 
             try {
-                await command.autocomplete(interaction);
+                await command.autocomplete(
+                    interaction
+                );
             } catch (error) {
                 console.error(
                     `Error handling autocomplete for "${interaction.commandName}":`,
                     error
                 );
 
-                await interaction.respond([]).catch(() => {});
+                await interaction
+                    .respond([])
+                    .catch(() => {});
             }
 
             return;
         }
 
         if (!interaction.isChatInputCommand()) {
+            return;
+        }
+
+        const command =
+            this.commands.get(
+                interaction.commandName
+            );
+
+        if (!command) {
             return;
         }
 
@@ -90,6 +121,17 @@ class CommandHandler {
                 `Error executing command "${interaction.commandName}":`,
                 error
             );
+
+            const message = {
+                content: 'An error occurred while executing this command.',
+                flags: MessageFlags.Ephemeral
+            };
+
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp(message);
+            } else {
+                await interaction.reply(message);
+            }
         }
     }
 }
