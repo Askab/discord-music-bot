@@ -23,7 +23,10 @@ class GuildMusicPlayer {
 
         this.queue = new Queue();
         this.currentTrack = null;
+        
         this.currentTrackStartedAt = null;
+        this.pausedAt = null;
+        this.pausedDuration = 0;
 
         this.setupAudioPlayerEvents();
     }
@@ -109,6 +112,8 @@ class GuildMusicPlayer {
         if (!track) {
             this.currentTrack = null;
             this.currentTrackStartedAt = null;
+            this.pausedAt = null;
+            this.pausedDuration = 0;
 
             console.log(
                 `[${this.guildId}] Queue is empty.`
@@ -119,6 +124,8 @@ class GuildMusicPlayer {
 
         this.currentTrack = track;
         this.currentTrackStartedAt = Date.now();
+        this.pausedAt = null;
+        this.pausedDuration = 0;
 
         console.log(
             `[${this.guildId}] Playing: ${track.displayName}`
@@ -134,6 +141,8 @@ class GuildMusicPlayer {
     stop() {
         this.currentTrack = null;
         this.currentTrackStartedAt = null;
+        this.pausedAt = null;
+        this.pausedDuration = 0;
 
         this.queue.clear();
 
@@ -156,7 +165,15 @@ class GuildMusicPlayer {
             return false;
         }
 
-        return this.audioPlayer.pause();
+        const paused = this.audioPlayer.pause();
+
+        if (!paused) {
+            return false;
+        }
+
+        this.pausedAt = Date.now();
+
+        return true;
     }
 
     resume() {
@@ -164,7 +181,20 @@ class GuildMusicPlayer {
             return false;
         }
 
-        return this.audioPlayer.unpause();
+        const resumed = this.audioPlayer.unpause();
+
+        if (!resumed) {
+            return false;
+        }
+
+        if (this.pausedAt) {
+            this.pausedDuration +=
+                Date.now() - this.pausedAt;
+
+            this.pausedAt = null;
+        }
+
+        return true;
     }
 
     leave() {

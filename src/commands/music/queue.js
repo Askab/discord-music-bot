@@ -89,8 +89,15 @@ module.exports = {
             let currentRemaining = currentTrack.duration;
 
             if (player.currentTrackStartedAt) {
-                const elapsed =
+                let elapsed =
                     (Date.now() - player.currentTrackStartedAt) / 1000;
+
+                elapsed -= player.pausedDuration / 1000;
+
+                if (player.pausedAt) {
+                    elapsed -=
+                        (Date.now() - player.pausedAt) / 1000;
+                }
 
                 currentRemaining = Math.max(
                     0,
