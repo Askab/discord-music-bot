@@ -27,6 +27,7 @@ class GuildMusicPlayer {
         this.currentTrackStartedAt = null;
         this.pausedAt = null;
         this.pausedDuration = 0;
+        this.loopMode = 'off';
 
         this.setupAudioPlayerEvents();
     }
@@ -107,7 +108,13 @@ class GuildMusicPlayer {
     }
 
     playNext() {
-        const track = this.queue.next();
+        let track;
+
+        if (this.loopMode === 'track' && this.currentTrack) {
+            track = this.currentTrack;
+        } else {
+            track = this.queue.next();
+        }
 
         if (!track) {
             this.currentTrack = null;
@@ -120,6 +127,13 @@ class GuildMusicPlayer {
             );
 
             return;
+        }
+
+        if (
+            this.loopMode === 'queue' &&
+            this.currentTrack
+        ) {
+            this.queue.add(this.currentTrack);
         }
 
         this.currentTrack = track;
