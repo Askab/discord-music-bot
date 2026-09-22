@@ -3,6 +3,12 @@ const {
     MessageFlags
 } = require('discord.js');
 
+const {
+    LoopMode,
+    LoopModeLabels,
+    LoopModeEmojis
+} = require('../../constants/LoopMode');
+
 function formatDuration(seconds) {
     const totalSeconds = Math.max(
         0,
@@ -93,6 +99,18 @@ module.exports = {
 
         const queueSize = player.queue.size;
 
+        /**
+         * Loop Mode
+         */
+        const loopMode =
+            player.loopMode ?? LoopMode.OFF;
+
+        const loopLabel =
+            LoopModeLabels[loopMode];
+
+        const loopEmoji =
+            LoopModeEmojis[loopMode];
+
         const progressBar =
             createProgressBar(progress);
 
@@ -102,7 +120,8 @@ module.exports = {
             `**${track.displayName}**\n\n` +
             `\`${progressBar}\`\n` +
             `⏱️ \`${formatDuration(elapsed)} / ${formatDuration(track.duration)}\`\n\n` +
-            `📋 **Queue:** ${queueSize} track${queueSize === 1 ? '' : 's'}`
+            `📋 **Queue:** ${queueSize} track${queueSize === 1 ? '' : 's'}` +
+            `\n🔁 **Loop:** ${loopEmoji} ${loopLabel}`
         );
     }
 };

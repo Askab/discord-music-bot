@@ -3,6 +3,12 @@ const {
     MessageFlags
 } = require('discord.js');
 
+const {
+    LoopMode,
+    LoopModeLabels,
+    LoopModeEmojis
+} = require('../../constants/LoopMode');
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('loop')
@@ -14,16 +20,16 @@ module.exports = {
                 .setRequired(true)
                 .addChoices(
                     {
-                        name: 'Off',
-                        value: 'off'
+                        name: LoopModeLabels[LoopMode.OFF],
+                        value: LoopMode.OFF
                     },
                     {
-                        name: 'Track',
-                        value: 'track'
+                        name: LoopModeLabels[LoopMode.TRACK],
+                        value: LoopMode.TRACK
                     },
                     {
-                        name: 'Queue',
-                        value: 'queue'
+                        name: LoopModeLabels[LoopMode.QUEUE],
+                        value: LoopMode.QUEUE
                     }
                 )
         ),
@@ -45,19 +51,22 @@ module.exports = {
             return;
         }
 
-        const mode =
+        const loopMode =
             interaction.options.getString('mode');
 
-        player.loopMode = mode;
+        player.loopMode = loopMode;
 
-        const messages = {
-            off: '🔁 Loop disabled.',
-            track: '🔂 Track loop enabled.',
-            queue: '🔁 Queue loop enabled.'
-        };
+        if (loopMode === LoopMode.OFF) {
+            await interaction.reply(
+                `${LoopModeEmojis[loopMode]} Loop disabled.`
+            );
+
+            return;
+        }
 
         await interaction.reply(
-            messages[mode]
+            `${LoopModeEmojis[loopMode]} ` +
+            `${LoopModeLabels[loopMode]} loop enabled.`
         );
     }
 };
