@@ -1,5 +1,7 @@
 const GuildMusicPlayer = require('./GuildMusicPlayer');
 const AudioService = require('../services/AudioService');
+const MetadataService = require('../services/MetadataService');
+const PlaylistService = require('../services/PlaylistService');
 
 class MusicManager {
 
@@ -8,6 +10,10 @@ class MusicManager {
 
         this.players = new Map();
         this.audioService = new AudioService();
+        this.metadataService = new MetadataService();
+        this.playlistService = new PlaylistService(
+            this.metadataService
+        );
     }
 
     getPlayer(guildId) {
@@ -15,7 +21,7 @@ class MusicManager {
     }
 
     createPlayer(guild) {
-        
+
         const player = new GuildMusicPlayer(
             guild,
             this.audioService

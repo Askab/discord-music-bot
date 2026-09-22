@@ -23,6 +23,7 @@ class GuildMusicPlayer {
 
         this.queue = new Queue();
         this.currentTrack = null;
+        this.currentTrackStartedAt = null;
 
         this.setupAudioPlayerEvents();
     }
@@ -107,6 +108,7 @@ class GuildMusicPlayer {
 
         if (!track) {
             this.currentTrack = null;
+            this.currentTrackStartedAt = null;
 
             console.log(
                 `[${this.guildId}] Queue is empty.`
@@ -116,14 +118,23 @@ class GuildMusicPlayer {
         }
 
         this.currentTrack = track;
+        this.currentTrackStartedAt = Date.now();
 
-        const resource = this.audioService.createResource(track);
+        console.log(
+            `[${this.guildId}] Playing: ${track.displayName}`
+        );
+
+        const resource = this.audioService.createResource(
+            track.fileName
+        );
 
         this.audioPlayer.play(resource);
     }
 
     stop() {
         this.currentTrack = null;
+        this.currentTrackStartedAt = null;
+
         this.queue.clear();
 
         this.audioPlayer.stop();

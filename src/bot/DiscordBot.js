@@ -32,6 +32,9 @@ class DiscordBot {
         this.commandHandler.loadCommands();
         this.eventHandler.loadEvents();
 
+        await this.client.musicManager.playlistService
+            .loadPlaylists();
+
         await this.client.login(config.discordToken);
     }
 }

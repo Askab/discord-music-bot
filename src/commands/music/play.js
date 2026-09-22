@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { MessageFlags } = require('discord.js');
+const Track = require('../../music/Track');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -27,11 +28,19 @@ module.exports = {
         try {
             await player.join(channel);
 
-            player.addTrack('test.mp3');
+            const metadata =
+                await musicManager.metadataService.read(
+                    'test.mp3'
+                );
+
+            const track = new Track(metadata);
+
+            player.addTrack(track);
 
             await interaction.reply(
-                'Lejátszom a test.mp3-at! 🎵'
+                `🎵 **${track.displayName}** inserted into the playlist!`
             );
+
         } catch (error) {
             console.error('Failed to play audio:', error);
 
