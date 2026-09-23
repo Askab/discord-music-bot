@@ -13,11 +13,12 @@ const MusicPlayerUpdater =
 
 class GuildMusicPlayer {
 
-    constructor(guild, audioService) {
+    constructor(guild, audioService, presenceService) {
         this.guild = guild;
         this.guildId = guild.id;
 
         this.audioService = audioService;
+        this.presenceService = presenceService;
 
         this.connection = null;
         this.channelId = null;
@@ -158,6 +159,8 @@ class GuildMusicPlayer {
         this.audioPlayer.play(resource);
 
         this.playerUpdater.update();
+
+        this.presenceService.update(this);
     }
 
     stop() {
@@ -169,6 +172,8 @@ class GuildMusicPlayer {
         this.queue.clear();
 
         this.audioPlayer.stop();
+
+        this.presenceService.update(this);
     }
 
     skip() {
