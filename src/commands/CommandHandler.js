@@ -7,6 +7,10 @@ const {
     handleMusicPlayerButton
 } = require('../components/music/MusicPlayerButtons');
 
+const {
+    handleQueueButton
+} = require('../components/music/QueueButtons');
+
 class CommandHandler {
 
     constructor() {
@@ -59,15 +63,26 @@ class CommandHandler {
     async handle(interaction) {
 
         if (interaction.isButton()) {
+
             if (
                 interaction.customId.startsWith('music_')
             ) {
                 await handleMusicPlayerButton(
                     interaction
                 );
+
+                return;
             }
 
-            return;
+            if (
+                interaction.customId.startsWith(
+                    'queue_'
+                )
+            ) {
+                return handleQueueButton(
+                    interaction
+                );
+            }
         }
 
         if (interaction.isAutocomplete()) {
