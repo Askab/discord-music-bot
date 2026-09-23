@@ -6,7 +6,6 @@ const {
 
 const {
     LoopMode,
-    LoopModeLabels,
     LoopModeEmojis
 } = require('../../constants/LoopMode');
 

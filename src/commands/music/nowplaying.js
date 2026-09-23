@@ -1,11 +1,12 @@
 const {
+    AttachmentBuilder,
     SlashCommandBuilder,
     MessageFlags
 } = require('discord.js');
 
 const {
-    createMusicPlayerEmbed
-} = require('../../components/music/MusicPlayerEmbed');
+    renderMusicPlayer
+} = require('../../components/music/MusicPlayerCardRenderer');
 
 const {
     createMusicPlayerButtons
@@ -36,15 +37,23 @@ module.exports = {
             return;
         }
 
-        const embed =
-            createMusicPlayerEmbed(player);
+        const image =
+            await renderMusicPlayer(player);
+
+        const attachment =
+            new AttachmentBuilder(
+                image,
+                {
+                    name: 'music-player.png'
+                }
+            );
 
         const buttons =
             createMusicPlayerButtons(player);
 
         const message =
             await interaction.reply({
-                embeds: [embed],
+                files: [attachment],
                 components: buttons,
                 fetchReply: true
             });

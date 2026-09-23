@@ -5,13 +5,15 @@ class Track {
         artist,
         album,
         duration,
-        fileName
+        fileName,
+        artwork
     }) {
         this.title = title;
         this.artist = artist;
         this.album = album;
         this.duration = duration;
         this.fileName = fileName;
+        this.artwork = artwork ?? null;
     }
 
     get displayName() {

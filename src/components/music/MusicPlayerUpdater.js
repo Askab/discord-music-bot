@@ -1,6 +1,10 @@
 const {
-    createMusicPlayerEmbed
-} = require('./MusicPlayerEmbed');
+    AttachmentBuilder
+} = require('discord.js');
+
+const {
+    renderMusicPlayer
+} = require('./MusicPlayerCardRenderer');
 
 const {
     createMusicPlayerButtons
@@ -9,10 +13,9 @@ const {
 const UPDATE_INTERVAL = 5_000;
 
 class MusicPlayerUpdater {
-
+    
     constructor(player) {
         this.player = player;
-
         this.message = null;
         this.interval = null;
         this.isUpdating = false;
@@ -53,9 +56,17 @@ class MusicPlayerUpdater {
         this.isUpdating = true;
 
         try {
-            const embed =
-                createMusicPlayerEmbed(
+            const image =
+                await renderMusicPlayer(
                     this.player
+                );
+
+            const attachment =
+                new AttachmentBuilder(
+                    image,
+                    {
+                        name: 'music-player.png'
+                    }
                 );
 
             const buttons =
@@ -64,7 +75,8 @@ class MusicPlayerUpdater {
                 );
 
             await this.message.edit({
-                embeds: [embed],
+                embeds: [],
+                files: [attachment],
                 components: buttons
             });
         } catch (error) {

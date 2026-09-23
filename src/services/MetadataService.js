@@ -45,12 +45,24 @@ class MetadataService {
             }
         }
 
+        const picture =
+            metadata.common.picture?.find(
+                picture => picture.type === 'Cover (front)'
+            ) ??
+            metadata.common.picture?.[0] ?? null;
+
         return {
             title,
             artist,
             album: metadata.common.album ?? null,
             duration: metadata.format.duration ?? 0,
-            fileName
+            fileName,
+            artwork: picture
+                ? {
+                    data: Buffer.from(picture.data),
+                    format: picture.format
+                }
+                : null
         };
     }
 
